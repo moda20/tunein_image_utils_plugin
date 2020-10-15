@@ -1,0 +1,43 @@
+group 'com.example.tunein_image_utils_plugin'
+version '1.0'
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.0'
+    }
+}
+
+rootProject.allprojects {
+    repositories {
+        google()
+        jcenter()
+    }
+}
+
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 16
+    }
+    lintOptions {
+        disable 'InvalidPackage'
+    }
+}
+
+
+dependencies {
+
+    //implementation files('/Users/kadhem/Downloads/flutter/bin/cache/artifacts/engine/android-x64/flutter.jar')
+    implementation 'androidx.documentfile:documentfile:1.0.1'
+    compile 'androidx.palette:palette:1.0.0'
+
+}
