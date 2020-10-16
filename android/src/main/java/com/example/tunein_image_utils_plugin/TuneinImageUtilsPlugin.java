@@ -119,14 +119,17 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
     switch (methodCall.method){
       case "getPlatformVersion":{
         result.success("Android " + android.os.Build.VERSION.RELEASE);
+        break;
       }
       case "sendToBackground":{
         activity.moveTaskToBack(true);
         result.success(true);
+        break;
       }
       case "getStoragePath":{
         String path = Environment.getDataDirectory().toString();
         result.success(path);
+        break;
       }
       case "getSDCardPermission":{
         PluginRegistry.ActivityResultListener newListener = new PluginRegistry.ActivityResultListener() {
@@ -160,6 +163,7 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
         }
         pluginMethods.takeCardUriPermission(context.getExternalCacheDirs()[1].toString());
         result.success(true);
+        break;
       }
       case "saveFileFromBytes":{
         String filepath = (String) methodCall.argument("filepath");
@@ -170,11 +174,13 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
         }else {
           result.error("Error occurred when saving file, check console","",null);
         }
+        break;
       }
       case "getMetaData":{
         String filepath = (String) methodCall.argument("filepath");
         List l = pluginMethods.getFileMetaData(filepath);
         result.success(l);
+        break;
       }
       case "getSdCardPath":{
         String removableStoragePath = null;
@@ -184,14 +190,17 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
           result.error("400",e.getMessage(),e);
         }
         result.success(removableStoragePath);
+        break;
       }
       case "getColor":{
         String path = methodCall.argument("path");
         List<Integer> colors = pluginMethods.getDominantColorReal(path);
         result.success(colors);
+        break;
       }
       default:{
         result.notImplemented();
+        break;
       }
     }
 
