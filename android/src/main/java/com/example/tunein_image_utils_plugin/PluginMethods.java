@@ -32,7 +32,6 @@ public class PluginMethods {
 
     public PluginMethods(Context context, Activity activity, ActivityPluginBinding activityPluginBinding) {
         this.context = context;
-        this.activity = activity;
         this.activityPluginBinding = activityPluginBinding;
     }
 
@@ -68,14 +67,17 @@ public class PluginMethods {
         return l;
     }
 
-    public  void takeCardUriPermission(String sdCardRootPath) {
+    public  void takeCardUriPermission(String sdCardRootPath, Activity activity) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
             File sdCard = new File(sdCardRootPath);
             StorageManager storageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
             StorageVolume storageVolume = storageManager.getStorageVolume(sdCard);
             Intent intent = storageVolume.createAccessIntent(null);
             try {
-                activity.startActivityForResult(intent, 4010);
+                if(this.activity==null){
+                    this.activity = activity;
+                }
+                this.activity.startActivityForResult(intent, 4010);
             } catch (ActivityNotFoundException e) {
                 Log.e("TUNE-IN ANDROID", "takeCardUriPermission: "+e);
             }

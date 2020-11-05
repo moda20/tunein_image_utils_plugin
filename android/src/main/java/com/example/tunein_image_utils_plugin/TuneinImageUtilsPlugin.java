@@ -26,6 +26,7 @@ import java.util.Map;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.embedding.engine.plugins.activity.ActivityAware;
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding;
+import io.flutter.plugin.common.BinaryMessenger;
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler;
@@ -39,33 +40,23 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
   ///
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
+  private static final String ID = "tunein_image_utils_plugin";
   private MethodChannel channel;
-  private Context context;
+  private Context mContext;
   private Activity activity;
   private ActivityPluginBinding activityPluginBinding;
   private PluginMethods pluginMethods;
   public Registrar registrar;
 
-  @Override
-  public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "tunein_image_utils_plugin");
-    context=flutterPluginBinding.getApplicationContext();
-    channel.setMethodCallHandler(this);
-  }
+  public TuneinImageUtilsPlugin() {
 
-  public TuneinImageUtilsPlugin(MethodChannel channel, Context context, Activity activity, ActivityPluginBinding activityPluginBinding, PluginMethods pluginMethods) {
-    this.channel = channel;
-    this.context = context;
-    this.activity = activity;
-    this.activityPluginBinding = activityPluginBinding;
-    this.pluginMethods = pluginMethods;
   }
 
   @Override
   public void onAttachedToActivity(ActivityPluginBinding activityPluginBinding) {
     // TODO: your plugin is now attached to an Activity
     activity=activityPluginBinding.getActivity();
-    activityPluginBinding=activityPluginBinding;
+    this.activityPluginBinding=activityPluginBinding;
   }
 
   @Override
@@ -95,15 +86,26 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
   // depending on the user's project. onAttachedToEngine or registerWith must both be defined
   // in the same class.
   public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "tunein_image_utils_plugin");
-    TuneinImageUtilsPlugin newInstance = new TuneinImageUtilsPlugin(channel,registrar.context(),registrar.activity(),null,new PluginMethods(registrar.context(),registrar.activity(),null));
-    newInstance.registrar=registrar;
-    channel.setMethodCallHandler(newInstance);
+    TuneinImageUtilsPlugin newInstance = new TuneinImageUtilsPlugin();
+    newInstance.initInstance(registrar.messenger(), registrar.context());
   }
+
+  @Override
+  public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
+    initInstance(flutterPluginBinding.getBinaryMessenger(), flutterPluginBinding.getApplicationContext());
+  }
+
+  private void initInstance(BinaryMessenger binaryMessenger, Context context){
+    this.channel = new MethodChannel(binaryMessenger, ID);
+    this.channel.setMethodCallHandler(this);
+    mContext = context;
+    this.pluginMethods = new PluginMethods(context,null,null);
+  }
+
   public  void takeCardUriPermission(String sdCardRootPath) {
     if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
       File sdCard = new File(sdCardRootPath);
-      StorageManager storageManager = (StorageManager) context.getSystemService(Context.STORAGE_SERVICE);
+      StorageManager storageManager = (StorageManager) mContext.getSystemService(Context.STORAGE_SERVICE);
       StorageVolume storageVolume = storageManager.getStorageVolume(sdCard);
       Intent intent = storageVolume.createAccessIntent(null);
       try {
@@ -139,13 +141,13 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
 
               Uri uri = data.getData();
 
-              context.grantUriPermission(context.getPackageName(), uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
+              mContext.grantUriPermission(mContext.getPackageName(), uri, Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
                       Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
               final int takeFlags = data.getFlags() & (Intent.FLAG_GRANT_WRITE_URI_PERMISSION |
                       Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-              context.getContentResolver().takePersistableUriPermission(uri, takeFlags);
+              mContext.getContentResolver().takePersistableUriPermission(uri, takeFlags);
               result.success(pluginMethods.getUri().toString());
               return true;
             }
@@ -161,7 +163,7 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
             registrar.addActivityResultListener(newListener);
           }
         }
-        pluginMethods.takeCardUriPermission(context.getExternalCacheDirs()[1].toString());
+        pluginMethods.takeCardUriPermission(mContext.getExternalCacheDirs()[1].toString(), this.activity);
         result.success(true);
         break;
       }
@@ -185,7 +187,7 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
       case "getSdCardPath":{
         String removableStoragePath = null;
         try {
-          removableStoragePath = context.getExternalCacheDirs()[1].toString();
+          removableStoragePath = mContext.getExternalCacheDirs()[1].toString();
         } catch (Exception e) {
           result.error("400",e.getMessage(),e);
         }
