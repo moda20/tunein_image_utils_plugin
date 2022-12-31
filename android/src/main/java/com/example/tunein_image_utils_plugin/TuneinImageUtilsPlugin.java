@@ -187,7 +187,7 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
       case "getSdCardPath":{
         String removableStoragePath = null;
         try {
-          print(mContext.getExternalCacheDirs().toString());
+          android.util.Log.d("qqsdqsdqsd", mContext.getExternalCacheDirs().toString());
           removableStoragePath = mContext.getExternalCacheDirs()[1].toString();
         } catch (Exception e) {
           result.error("400",e.getMessage(),e);
