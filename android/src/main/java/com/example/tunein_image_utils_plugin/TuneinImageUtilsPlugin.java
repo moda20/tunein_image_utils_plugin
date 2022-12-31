@@ -190,6 +190,7 @@ public class TuneinImageUtilsPlugin implements FlutterPlugin, MethodCallHandler,
           removableStoragePath = mContext.getExternalCacheDirs()[1].toString();
         } catch (Exception e) {
           result.error("400",e.getMessage(),e);
+          return;
         }
         result.success(removableStoragePath);
         break;
